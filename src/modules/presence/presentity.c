@@ -555,6 +555,9 @@ int is_dialog_terminated(presentity_t* presentity)
 	return rtn;
 }
 
+//int _api_update_presentity(str *event, str *realm, str *user, str *etag,
+	//	str *sender, str *body, int expires, int reset)
+
 int update_presentity(struct sip_msg* msg, presentity_t* presentity, str* body,
 		int new_t, int* sent_reply, char* sphere, str* etag_override, str* ruid)
 {
@@ -1914,4 +1917,39 @@ int delete_offline_presentities(str *pres_uri, pres_ev_t *event)
 
 error:
 	return -1;
+}
+
+// used for API updates to the presentity table
+int _api_update_presentity(str *event, str *realm, str *user, str *etag,
+		str *sender, str *body, int expires, int reset)
+{
+	int ret;
+	presentity_t *pres = NULL;
+	pres_ev_t *ev;
+	char *sphere = NULL;
+
+	LM_ERR("HErE 00000000\n");
+	ev = contains_event(event, NULL);
+	if(ev == NULL) {
+		LM_ERR("wrong event parameter\n");
+		return -1;
+	}
+	LM_ERR("HErE 00000001\n");
+
+	pres = new_presentity(realm, user, expires, ev, etag, sender);
+
+	LM_ERR("HErE 00000002\n");
+	if(sphere_enable) {
+		sphere = extract_sphere(*body);
+	}
+	LM_ERR("HErE 00000003\n");
+	ret = update_presentity(NULL, pres, body, 1, NULL, sphere, NULL, NULL);
+
+	LM_ERR("HErE 00000004\n");
+	if(pres)
+		pkg_free(pres);
+	if(sphere)
+		pkg_free(sphere);
+
+	return ret;
 }

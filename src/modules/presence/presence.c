@@ -694,6 +694,22 @@ error:
 	return -1;
 }
 
+int pres_refresh_watchers_db_notify(str *pres, str *event) {
+	pres_ev_t *ev;
+
+	ev = contains_event(event, NULL);
+	if(ev == NULL) {
+		LM_ERR("wrong event parameter\n");
+		return -1;
+	}
+	/* if a request to refresh notified info */
+	if (query_db_notify(pres, ev, NULL) < 0) {
+		LM_ERR("sending Notify requests\n");
+		return -1;
+	}
+	return 0;
+}
+
 int ki_pres_refresh_watchers(sip_msg_t *msg, str *pres, str *event, int type)
 {
 	return pres_refresh_watchers(pres, event, type, NULL, NULL);
